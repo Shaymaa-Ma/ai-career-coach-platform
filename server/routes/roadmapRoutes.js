@@ -6,10 +6,7 @@ const verifyToken = require("../middlewares/verifyToken");
 const generateRoadmapAI = require("../services/generateRoadmapAI");
 
 
-// ======================================================
 // GENERATE ROADMAP
-// ======================================================
-
 router.post("/roadmap/generate", verifyToken, async (req, res) => {
 
   try {
@@ -276,10 +273,8 @@ router.post("/roadmap/generate", verifyToken, async (req, res) => {
 });
 
 
-// ======================================================
-// LATEST ROADMAP
-// ======================================================
 
+// LATEST ROADMAP
 router.get("/roadmap/latest", verifyToken, (req, res) => {
 
   db.query(
@@ -307,10 +302,8 @@ router.get("/roadmap/latest", verifyToken, (req, res) => {
 });
 
 
-// ======================================================
-// GET ROADMAP
-// ======================================================
 
+// GET ROADMAP
 router.get("/roadmap/:id", verifyToken, async (req, res) => {
 
   try {
@@ -411,10 +404,8 @@ router.get("/roadmap/:id", verifyToken, async (req, res) => {
 
 
 
-// ======================================================
-// UPDATE STEP
-// ======================================================
 
+// UPDATE STEP
 router.put("/roadmap/step/:id", verifyToken, async (req, res) => {
 
   try {
@@ -632,10 +623,8 @@ WHERE rs.id=? AND lr.user_id=?
 
 
 
-// ======================================================
-// RESUME CHECK
-// ======================================================
 
+// RESUME CHECK
 router.get("/resume/my-resume", verifyToken, (req, res) => {
 
   db.query(
