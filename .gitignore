@@ -1,0 +1,13 @@
+# Dependencies
+client/node_modules/
+server/node_modules/
+
+# Environment variables
+server/.env
+client/.env
+
+# Uploads
+server/uploads/
+
+# Logs
+*.log
