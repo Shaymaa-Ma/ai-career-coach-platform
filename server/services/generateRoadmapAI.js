@@ -1,43 +1,36 @@
 const groq = require("../config/groq");
+
 /*
 AI Personalized Roadmap Generator
 
-This module generates dynamic AI-powered learning
-roadmaps using the Groq API based on the user's:
+Creates adaptive, AI-powered learning roadmaps
+based on a user's role, skill gaps, recommendations,
+and academic background.
 
-- Career role
-- Skill gaps and weaknesses
-- Personalized recommendations
-- Academic major/background
-
-Main Features:
-- Automatically adjusts roadmap duration(number of weeks)
-  based on user weaknesses
-- Creates progressive learning flow:
-  Beginner → Intermediate → Advanced
-- Generates practical industry-focused steps
-- Includes projects, portfolio tasks,
-  deployment, and interview preparation
-- Prevents repeated skills/topics
-- Provides structured weekly learning plans
-- Generates realistic study time estimates
-- Creates YouTube search queries for resources
-- Uses safe JSON parsing and fallback handling
-- Applies automatic level correction if AI fails
-
-The roadmap is designed to simulate a real
-career development path that helps users
-become job-ready step by step.
-
+The roadmap follows a progressive learning path,
+includes practical projects and interview preparation,
+and provides a structured journey from beginner to
+job-ready proficiency.
 */
 
 //AI Roadmap generator function
-
 async function generateRoadmapAI(role, gaps, recommendations, major) {
+
+  // --------------------------------------------------
+  // Analyze detected weaknesses
+  // The number of gaps and recommendations determines
+  // how extensive the learning roadmap should be.
+  // --------------------------------------------------
 
   const totalWeaknesses =
     (gaps?.length || 0) +
     (recommendations?.length || 0);
+
+  // --------------------------------------------------
+  // Dynamic Roadmap Duration
+  // More weaknesses result in a longer roadmap
+  // to provide sufficient learning coverage.
+  // --------------------------------------------------
 
   let weeksCount = 4;
 
@@ -45,9 +38,13 @@ async function generateRoadmapAI(role, gaps, recommendations, major) {
   if (totalWeaknesses >= 7) weeksCount = 8;
   if (totalWeaknesses >= 10) weeksCount = 10;
 
-  // ================= LEVEL FLOW =================
-  // Makes roadmap naturally progress:
-  // Beginner -> Intermediate -> Advanced
+  // --------------------------------------------------
+  // Learning Progression Strategy
+  // The roadmap follows a structured progression:
+  // Beginner → Intermediate → Advanced
+  // This prevents overwhelming users and ensures
+  // gradual skill development.
+  // --------------------------------------------------
 
   let roadmapFlow = "";
 
@@ -83,6 +80,14 @@ async function generateRoadmapAI(role, gaps, recommendations, major) {
 - Weeks 8-10 MUST be Advanced
 `;
   }
+
+
+  // --------------------------------------------------
+  // AI Prompt Construction
+  // Generates detailed instructions for the AI model
+  // to create a realistic and personalized roadmap
+  // based on the user's profile.
+  // --------------------------------------------------
 
   const prompt = `
 You are a senior AI learning architect.
@@ -152,7 +157,7 @@ JSON FORMAT:
             "title": "string",
             "type": "video",
             "platform": "youtube",
-            "url": null,
+            "url": null,  
             "searchQuery": "string"
           }
         }
@@ -176,6 +181,12 @@ ${major || ""}
 
   try {
 
+    // --------------------------------------------------
+    // Generate Roadmap using Groq AI
+    // LLaMA 3.3 70B creates a structured roadmap
+    // following all learning progression rules.
+    // --------------------------------------------------
+
     const response =
       await groq.chat.completions.create({
         model: "llama-3.3-70b-versatile",
@@ -191,6 +202,13 @@ ${major || ""}
     const raw =
       response.choices?.[0]?.message?.content || "";
 
+    // --------------------------------------------------
+    // Safe JSON Extraction
+    // AI responses may contain unexpected text.
+    // Extract only the JSON object required by
+    // the application.
+    // --------------------------------------------------
+
     const match =
       raw.match(/\{[\s\S]*\}/);
 
@@ -198,15 +216,26 @@ ${major || ""}
       return {
         title: "Roadmap",
         description: "",
-        weeks: []
+        weeks: [] //
       };
     }
+
+
+    // --------------------------------------------------
+    // Convert AI response into JavaScript object
+    // --------------------------------------------------
 
     const parsed =
       JSON.parse(match[0]);
 
-    // ================= FALLBACK LEVEL FIX =================
-    // Ensures proper progression even if AI fails
+    // --------------------------------------------------
+    // Automatic Level Correction
+    // Even if the AI returns incorrect levels,
+    // the system enforces a proper learning flow:
+    // Beginner → Intermediate → Advanced
+    // This guarantees roadmap consistency and
+    // improves the learning experience.
+    // --------------------------------------------------
 
     const fixedWeeks =
       (parsed.weeks || []).map((week, index) => {

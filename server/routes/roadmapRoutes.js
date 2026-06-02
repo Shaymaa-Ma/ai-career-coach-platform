@@ -405,18 +405,14 @@ router.get("/roadmap/:id", verifyToken, async (req, res) => {
 
 
 
-// UPDATE STEP
+// ================= UPDATE STEP =================
 router.put("/roadmap/step/:id", verifyToken, async (req, res) => {
-
   try {
-
     const stepId = req.params.id;
     const { completed } = req.body;
 
     // ================= UPDATE STEP =================
-
     await new Promise((resolve, reject) => {
-
       db.query(
         `
         UPDATE roadmap_steps
@@ -425,134 +421,105 @@ router.put("/roadmap/step/:id", verifyToken, async (req, res) => {
           completed_at=?
         WHERE id=?
         `,
-        [
-          completed,
-          completed ? new Date() : null,
-          stepId
-        ],
-        (err) => {
-
-          if (err) reject(err);
-          else resolve();
-
-        }
+        [completed, completed ? new Date() : null, stepId],
+        (err) => (err ? reject(err) : resolve())
       );
-
     });
 
     // ================= GET STEP =================
-
     const step = await new Promise((resolve, reject) => {
-
       db.query(
         `
-       SELECT rs.*, rw.roadmap_id
-FROM roadmap_steps rs
-JOIN roadmap_weeks rw
-ON rs.week_id = rw.id
-JOIN learning_roadmaps lr
-ON rw.roadmap_id = lr.id
-WHERE rs.id=? AND lr.user_id=?
+        SELECT rs.*, rw.roadmap_id
+        FROM roadmap_steps rs
+        JOIN roadmap_weeks rw ON rs.week_id = rw.id
+        WHERE rs.id=? AND rw.roadmap_id IN (
+          SELECT id FROM learning_roadmaps WHERE user_id=?
+        )
         `,
-        [stepId, req.userId]
-        ,
-        
-        (err, rows) => {
-
-          if (err) reject(err);
-          else resolve(rows[0]);
-
-        }
-        
+        [stepId, req.userId],
+        (err, rows) => (err ? reject(err) : resolve(rows[0]))
       );
-
     });
 
-    // ================= CHECK WEEK COMPLETION =================
+    if (!step) {
+      return res.status(404).json({ error: "Step not found" });
+    }
 
-    const weekSteps = await new Promise((resolve, reject) => {
-
+    // ================= GET ALL WEEKS =================
+    const weeks = await new Promise((resolve, reject) => {
       db.query(
         `
-        SELECT completed
-        FROM roadmap_steps
-        WHERE week_id=?
+        SELECT *
+        FROM roadmap_weeks
+        WHERE roadmap_id=?
+        ORDER BY week_number ASC
         `,
-        [step.week_id],
-        (err, rows) => {
-
-          if (err) reject(err);
-          else resolve(rows);
-
-        }
+        [step.roadmap_id],
+        (err, rows) => (err ? reject(err) : resolve(rows))
       );
-
     });
 
-    const allCompleted =
-      weekSteps.every(s => s.completed);
+    // attach steps to each week
+    for (const week of weeks) {
+      week.steps = await new Promise((resolve, reject) => {
+        db.query(
+          `
+          SELECT *
+          FROM roadmap_steps
+          WHERE week_id=?
+          `,
+          [week.id],
+          (err, rows) => (err ? reject(err) : resolve(rows))
+        );
+      });
+    }
 
-    // ================= UPDATE WEEK =================
+    // ================= REBUILD WEEK LOGIC =================
+    let previousUnlocked = true;
 
-    await new Promise((resolve, reject) => {
+    for (let i = 0; i < weeks.length; i++) {
+      const week = weeks[i];
 
-      db.query(
-        `
-        UPDATE roadmap_weeks
-        SET completed=?
-        WHERE id=?
-        `,
-        [
-          allCompleted,
-          step.week_id
-        ],
-        (err) => {
+      // check completion
+      const isCompleted =
+        week.steps.length > 0 &&
+        week.steps.every((s) => Number(s.completed) === 1);
 
-          if (err) reject(err);
-          else resolve();
-
-        }
-      );
-
-    });
-
-    // ================= UNLOCK NEXT WEEK =================
-
-    if (allCompleted) {
-
+      // update completion status
       await new Promise((resolve, reject) => {
-
         db.query(
           `
           UPDATE roadmap_weeks
-          SET unlocked=1
-          WHERE roadmap_id=?
-          AND week_number=(
-            SELECT week_number + 1
-            FROM roadmap_weeks
-            WHERE id=?
-          )
+          SET completed=?
+          WHERE id=?
           `,
-          [
-            step.roadmap_id,
-            step.week_id
-          ],
-          (err) => {
-
-            if (err) reject(err);
-            else resolve();
-
-          }
+          [isCompleted ? 1 : 0, week.id],
+          (err) => (err ? reject(err) : resolve())
         );
-
       });
 
+      // unlock logic (CHAIN RULE)
+      const shouldBeUnlocked = previousUnlocked;
+
+      await new Promise((resolve, reject) => {
+        db.query(
+          `
+          UPDATE roadmap_weeks
+          SET unlocked=?
+          WHERE id=?
+          `,
+          [shouldBeUnlocked ? 1 : 0, week.id],
+          (err) => (err ? reject(err) : resolve())
+        );
+      });
+
+      // next week depends on this one
+      previousUnlocked = isCompleted;
     }
 
     // ================= UPDATE PROGRESS =================
-
     const stats = await new Promise((resolve, reject) => {
-
       db.query(
         `
         SELECT
@@ -562,23 +529,15 @@ WHERE rs.id=? AND lr.user_id=?
         WHERE roadmap_id=?
         `,
         [step.roadmap_id],
-        (err, rows) => {
-
-          if (err) reject(err);
-          else resolve(rows[0]);
-
-        }
+        (err, rows) => (err ? reject(err) : resolve(rows[0]))
       );
-
     });
 
-    const progress =
-      Math.round(
-        ((stats.completed || 0) / stats.total) * 100
-      );
+    const progress = Math.round(
+      ((stats.completed || 0) / stats.total) * 100
+    );
 
     await new Promise((resolve, reject) => {
-
       db.query(
         `
         UPDATE learning_roadmaps
@@ -587,38 +546,21 @@ WHERE rs.id=? AND lr.user_id=?
           completed_steps=?
         WHERE id=?
         `,
-        [
-          progress,
-          stats.completed || 0,
-          step.roadmap_id
-        ],
-        (err) => {
-
-          if (err) reject(err);
-          else resolve();
-
-        }
+        [progress, stats.completed || 0, step.roadmap_id],
+        (err) => (err ? reject(err) : resolve())
       );
-
     });
 
     res.json({
       success: true,
-      progress
+      progress,
     });
-
-  }
-
-  catch (err) {
-
+  } catch (err) {
     console.log(err);
-
     res.status(500).json({
-      error: "Failed to update step"
+      error: "Failed to update step",
     });
-
   }
-
 });
 
 

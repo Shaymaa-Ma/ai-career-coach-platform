@@ -307,7 +307,7 @@ if (!token || !hasResume) {
 
   // ================= INTERVIEW UI =================
   return (
-    <div className="min-h-screen bg-[#050816] text-white pt-20">
+    <div className="min-h-screen bg-[#050816] text-white pt-24">
 
       {error && (
         <div className="fixed top-16 left-1/2 -translate-x-1/2 bg-red-500/20 px-4 py-2 rounded">

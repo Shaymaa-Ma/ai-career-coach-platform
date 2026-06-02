@@ -1,45 +1,12 @@
 const groq = require("../config/groq");
 const personalities = require("../utils/personalities");
 
-/*
-========================================================
-UNIVERSAL AI INTERVIEW GENERATOR SERVICE
-========================================================
-
-This service generates realistic AI interview questions
-for ALL majors, careers, and industries.
-
-Examples:
-- Computer Science
-- Business
-- Marketing
-- Medicine
-- Nursing
-- Finance
-- Law
-- Design
-- Education
-- Engineering
-- Psychology
-- Hospitality
-- HR
-- Aviation
-- Architecture
-- And more...
-
-Features:
-- Universal career adaptation
-- Strict interview type enforcement
-- Country-aware interview behavior
-- Personality-driven interviews
-- Difficulty progression
-- Safer JSON parsing
-- Question validation
-- Balanced mixed interviews
-- Real-world hiring simulation
-
-========================================================
-*/
+// ======================================================
+// AI Interview Generation Service
+// Generates adaptive interview questions using Groq AI
+// based on role, skills, weaknesses, country, language,
+// personality, and interview type.
+// ======================================================
 
 const generateInterview = async (
   role,
@@ -54,8 +21,11 @@ const generateInterview = async (
 ) => {
 
   try {
-
-    // ================= COUNTRY NORMALIZATION =================
+    // --------------------------------------------------
+    // Normalize country names into interview regions
+    // This allows different interview cultures to be
+    // simulated based on the candidate's country.
+    // --------------------------------------------------
     const normalizeCountry = (c = "") => {
 
       const map = {
@@ -94,7 +64,11 @@ const generateInterview = async (
 
     const countryStyle = normalizeCountry(country);
 
-    // ================= COUNTRY RULES =================
+    // --------------------------------------------------
+    // Country-specific interview styles
+    // Each region has its own communication expectations
+    // and workplace culture.
+    // --------------------------------------------------
     const countryRules = {
 
       western: `
@@ -129,7 +103,11 @@ const generateInterview = async (
 `
     };
 
-    // ================= INTERVIEW TYPE RULES =================
+    // --------------------------------------------------
+    // Interview Type Rules
+    // Controls what kind of questions the AI is allowed
+    // to generate.
+    // --------------------------------------------------
     const typeRules = {
 
       technical: `
@@ -251,7 +229,11 @@ The interview MUST simulate a realistic company hiring pipeline.
 `
     };
 
-    // ================= LANGUAGE RULES =================
+    // --------------------------------------------------
+    // Language Rules
+    // Ensures the generated interview remains entirely
+    // in the selected language.
+    // --------------------------------------------------
     const languageRules = `
 IMPORTANT LANGUAGE RULES:
 
@@ -261,7 +243,11 @@ IMPORTANT LANGUAGE RULES:
 - Technical terminology may remain in English if necessary
 `;
 
-    // ================= SCORING RULES =================
+    // --------------------------------------------------
+    // Evaluation Guidelines
+    // Used later during answer assessment to maintain
+    // consistent scoring standards.
+    // --------------------------------------------------
     const scoringRules = `
 SCORING RULES:
 
@@ -279,7 +265,11 @@ High scores (8-10) ONLY if answer is:
 
     const totalQuestions = 10;
 
-    // ================= PROMPT =================
+    // --------------------------------------------------
+    // AI Prompt Construction
+    // Builds a detailed prompt containing candidate
+    // profile, interview settings, and generation rules.
+    // --------------------------------------------------
     const prompt = `
 ${personalities[personality] || personalities.strict}
 
@@ -313,8 +303,8 @@ ${gaps.length ? gaps.join(", ") : "Not provided"}
 
 Recommendations:
 ${recommendations.length
-  ? recommendations.join(", ")
-  : "Not provided"}
+        ? recommendations.join(", ")
+        : "Not provided"}
 
 ================================================
 CORE RULES
@@ -432,7 +422,9 @@ OUTPUT FORMAT
 }
 `;
 
-    // ================= AI REQUEST =================
+    // --------------------------------------------------
+    // Send prompt to Groq AI using LLaMA 3.3 70B
+    // --------------------------------------------------
     const response = await groq.chat.completions.create({
 
       model: "llama-3.3-70b-versatile",
@@ -449,7 +441,10 @@ OUTPUT FORMAT
 
     const raw = response?.choices?.[0]?.message?.content || "";
 
-    // ================= SAFE JSON PARSING =================
+    // --------------------------------------------------
+    // Extract and parse JSON response safely
+    // Prevents crashes if AI returns extra text.
+    // --------------------------------------------------
     const jsonStart = raw.indexOf("{");
     const jsonEnd = raw.lastIndexOf("}");
 
@@ -461,7 +456,10 @@ OUTPUT FORMAT
       raw.slice(jsonStart, jsonEnd + 1)
     );
 
-    // ================= TYPE VALIDATION =================
+    // --------------------------------------------------
+    // Validate question types according to selected
+    // interview mode.
+    // --------------------------------------------------
     const allowedTypes = {
 
       technical: ["technical"],
@@ -489,7 +487,11 @@ OUTPUT FORMAT
     // ================= ENSURE QUESTION COUNT =================
     parsed.questions = parsed.questions.slice(0, totalQuestions);
 
-    // ================= DIFFICULTY PROGRESSION =================
+    // --------------------------------------------------
+    // Enforce progressive interview difficulty
+    // Easy → Medium → Hard
+    // regardless of AI ordering.
+    // --------------------------------------------------
     const expectedDifficulties = [
       "easy",
       "easy",
@@ -513,7 +515,11 @@ OUTPUT FORMAT
       throw new Error("AI generated invalid questions");
     }
 
-    // ================= RETURN CLEAN DATA =================
+    // --------------------------------------------------
+    // Fallback Response
+    // Returned if AI generation fails so the interview
+    // system never crashes.
+    // --------------------------------------------------
     return {
 
       role: parsed.role || role,

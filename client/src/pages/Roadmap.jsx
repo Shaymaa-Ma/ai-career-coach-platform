@@ -74,51 +74,82 @@ const Roadmap = () => {
   };
 
   // ================= TOGGLE =================
-  const toggleStep = async (stepId, completed) => {
-    try {
-      if (!token || !roadmap) return;
+ const toggleStep = async (stepId, completed) => {
+  try {
+    if (!token || !roadmap) return;
 
-      await fetch(`${API}/roadmap/step/${stepId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ completed }),
-      });
+    await fetch(`${API}/roadmap/step/${stepId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ completed }),
+    });
 
-      setRoadmap((prev) => {
-        if (!prev) return prev;
+    setRoadmap((prev) => {
+      if (!prev) return prev;
 
-        const updatedWeeks = prev.weeks.map((week) => {
-          const steps = week.steps.map((s) =>
-            s.id === stepId ? { ...s, completed } : s
-          );
-
-          return {
-            ...week,
-            steps,
-            completed: steps.every((s) => s.completed),
-          };
-        });
-
-        const allSteps = updatedWeeks.flatMap((w) => w.steps);
-        const progress =
-          Math.round(
-            (allSteps.filter((s) => s.completed).length / allSteps.length) *
-              100
-          );
+      // 1. Update step completion
+      let updatedWeeks = prev.weeks.map((week) => {
+        const steps = week.steps.map((s) =>
+          s.id === stepId ? { ...s, completed } : s
+        );
 
         return {
-          ...prev,
-          weeks: updatedWeeks,
-          progress,
+          ...week,
+          steps,
         };
       });
-    } catch (err) {
-      console.log(err);
-    }
-  };
+
+      // 2. Recalculate week completion + unlock logic
+      updatedWeeks = updatedWeeks.map((week, index) => {
+        const isCompleted = week.steps.every((s) => s.completed);
+
+        const isFirstWeek = index === 0;
+
+        let unlocked = false;
+
+        if (isFirstWeek) {
+          unlocked = true;
+        } else {
+          const prevWeek = updatedWeeks[index - 1];
+          unlocked = prevWeek.steps.every((s) => s.completed);
+        }
+
+        return {
+          ...week,
+          completed: isCompleted,
+          unlocked,
+        };
+      });
+
+      // 3. Ensure only consecutive unlocking (chain fix)
+      for (let i = 1; i < updatedWeeks.length; i++) {
+        if (!updatedWeeks[i - 1].completed) {
+          updatedWeeks[i].unlocked = false;
+        }
+      }
+
+      // 4. Progress calculation
+      const allSteps = updatedWeeks.flatMap((w) => w.steps);
+
+      const progress =
+        Math.round(
+          (allSteps.filter((s) => s.completed).length / allSteps.length) *
+            100
+        );
+
+      return {
+        ...prev,
+        weeks: updatedWeeks,
+        progress,
+      };
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
 
   useEffect(() => {
     loadRoadmap();
