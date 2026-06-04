@@ -24,11 +24,30 @@ const InterviewPrep = () => {
 
   // ================= RESTORE SESSION =================
   useEffect(() => {
+  const restoreSession = async () => {
     const savedSession = localStorage.getItem("sessionId");
-    if (savedSession) {
-      setSessionId(savedSession);
+
+    if (!savedSession) return;
+
+    try {
+      const res = await api.get(
+        `/api/interview/${savedSession}/questions`
+      );
+
+      if (res.data?.length > 0) {
+        setSessionId(savedSession);
+      } else {
+        localStorage.removeItem("sessionId");
+        localStorage.removeItem("interview_progress");
+      }
+    } catch {
+      localStorage.removeItem("sessionId");
+      localStorage.removeItem("interview_progress");
     }
-  }, []);
+  };
+
+  restoreSession();
+}, []);
 
   // ================= CHECK RESUME =================
   const checkResume = async () => {

@@ -456,8 +456,8 @@ All screenshots are stored in the `UI-screenshots/` folder located inside the ma
 
 ### 🤖 AI Career Coach
 
-![Coach 1](UI-screenshots/coach1.png)
-![Coach 2](UI-screenshots/coach2.png)
+![Coach 1](UI-screenshots/chat-session1.png)
+![Coach 2](UI-screenshots/chat-session2.png)
 ![Guest Coach](UI-screenshots/guest_coach.png)
 
 ### 🎤 AI Interview Simulator
@@ -479,6 +479,7 @@ All screenshots are stored in the `UI-screenshots/` folder located inside the ma
 ![Progress Interface](UI-screenshots/progressinterface.png)
 ![Interview Report 1](UI-screenshots/interview-report1.png)
 ![Interview Report 2](UI-screenshots/interview-report2.png)
+![Interview Report 3](UI-screenshots/interview-report3.png)
 
 ### 👥 Profile
 

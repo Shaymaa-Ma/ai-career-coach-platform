@@ -2,12 +2,11 @@ const express = require("express");
 const router = express.Router();
 
 const db = require("../config/db");
-const groq = require("../config/groq");
+const generateAIChatbot = require("../services/aiChatbot");
 
 const verifyToken = require("../middlewares/verifyToken");
 const verifyTokenOptional = require("../middlewares/verifyTokenOptional");
 
-//================AI Coach Chat Sessions Part=================
 // ================= CREATE SESSION =================
 router.post("/chat/session", verifyToken, (req, res) => {
     const { title } = req.body;
@@ -26,7 +25,6 @@ router.post("/chat/session", verifyToken, (req, res) => {
     );
 });
 
-
 // ================= GET SESSIONS =================
 router.get("/chat/sessions", verifyToken, (req, res) => {
     db.query(
@@ -38,7 +36,6 @@ router.get("/chat/sessions", verifyToken, (req, res) => {
         }
     );
 });
-
 
 // ================= RENAME SESSION =================
 router.put("/chat/session/:id", verifyToken, (req, res) => {
@@ -54,7 +51,6 @@ router.put("/chat/session/:id", verifyToken, (req, res) => {
     );
 });
 
-
 // ================= DELETE SESSION =================
 router.delete("/chat/session/:id", verifyToken, (req, res) => {
     db.query(
@@ -66,7 +62,6 @@ router.delete("/chat/session/:id", verifyToken, (req, res) => {
         }
     );
 });
-
 
 // ================= GET MESSAGES =================
 router.get("/chat/messages/:sessionId", verifyToken, (req, res) => {
@@ -91,20 +86,17 @@ router.get("/chat/messages/:sessionId", verifyToken, (req, res) => {
     );
 });
 
-
 // ================= SEND MESSAGE =================
 router.post("/chat/send", verifyTokenOptional, async (req, res) => {
-    const { sessionId, message } = req.body;
 
+    const { sessionId, message } = req.body;
 
     try {
         const userId = req.userId || null;
 
         let major = "";
 
-        // =========================
-        // 1. GET USER MAJOR (IF LOGGED IN)
-        // =========================
+        // ================= GET USER MAJOR =================
         if (userId) {
             const user = await new Promise((resolve, reject) => {
                 db.query(
@@ -117,9 +109,7 @@ router.post("/chat/send", verifyTokenOptional, async (req, res) => {
             major = user?.major || "";
         }
 
-        // =========================
-        // 2. SAVE USER MESSAGE (ONLY LOGGED-IN)
-        // =========================
+        // ================= SAVE USER MESSAGE =================
         if (userId && sessionId) {
             await new Promise((resolve, reject) => {
                 db.query(
@@ -130,9 +120,7 @@ router.post("/chat/send", verifyTokenOptional, async (req, res) => {
             });
         }
 
-        // =========================
-        // 3. GET HISTORY (ONLY LOGGED-IN)
-        // =========================
+        // ================= GET CHAT HISTORY =================
         let historyText = "";
 
         if (userId && sessionId) {
@@ -149,29 +137,14 @@ router.post("/chat/send", verifyTokenOptional, async (req, res) => {
                 .join("\n");
         }
 
-
-        // 4. AI PROMPT 
-
-        const prompt = `
-You are a career coach.
-
-User major: ${major || "unknown"}
-
-${historyText ? `Chat history:\n${historyText}\n` : ""}
-
-User: ${message}
-`;
-
-        const response = await groq.chat.completions.create({
-            model: "llama-3.3-70b-versatile",
-            messages: [{ role: "user", content: prompt }]
+        // ================= CALL AI SERVICE =================
+        const aiReply = await generateAIChatbot({
+            major,
+            historyText,
+            message
         });
 
-        const aiReply = response.choices[0].message.content;
-
-        // =========================
-        // 5. SAVE AI MESSAGE (ONLY LOGGED-IN)
-        // =========================
+        // ================= SAVE AI RESPONSE =================
         if (userId && sessionId) {
             await new Promise((resolve, reject) => {
                 db.query(
@@ -182,9 +155,7 @@ User: ${message}
             });
         }
 
-        // =========================
-        // 6. RESPONSE
-        // =========================
+        // ================= RESPONSE =================
         res.json({
             reply: aiReply,
             mode: userId ? "logged-in" : "guest"

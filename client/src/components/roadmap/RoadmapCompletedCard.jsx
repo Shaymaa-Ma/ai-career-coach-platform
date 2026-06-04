@@ -1,75 +1,153 @@
 import React from "react";
 import jsPDF from "jspdf";
 
-const RoadmapCompletedCard = ({ onRegenerate }) => {
+const RoadmapCompletedCard = ({ onRegenerate, userName = "AI Learner" }) => {
   const downloadCertificate = () => {
-    const doc = new jsPDF();
+    const doc = new jsPDF("landscape");
 
-    // ================= BORDER =================
-    doc.setDrawColor(0, 180, 200);
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+
+    // ================= OUTER BORDER =================
+    doc.setDrawColor(0, 120, 180);
     doc.setLineWidth(2);
-    doc.rect(10, 10, 190, 277);
+    doc.rect(8, 8, pageWidth - 16, pageHeight - 16);
 
-    doc.setDrawColor(120, 220, 255);
-    doc.setLineWidth(0.5);
-    doc.rect(14, 14, 182, 269);
+    // ================= INNER BORDER =================
+    doc.setDrawColor(180, 220, 255);
+    doc.setLineWidth(0.6);
+    doc.rect(12, 12, pageWidth - 24, pageHeight - 24);
 
-    // ================= TITLE =================
+    // ================= PLATFORM TITLE =================
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(26);
-    doc.setTextColor(0, 150, 180);
-    doc.text("CERTIFICATE", 105, 45, { align: "center" });
+    doc.setFontSize(14);
+    doc.setTextColor(70, 70, 70);
+    doc.text(
+      "AI CAREER COACH PLATFORM",
+      pageWidth / 2,
+      25,
+      { align: "center" }
+    );
 
-    doc.setFontSize(16);
-    doc.setTextColor(80, 80, 80);
-    doc.text("OF COMPLETION", 105, 55, { align: "center" });
+    // ================= MAIN TITLE =================
+    doc.setFont("times", "bold");
+    doc.setFontSize(30);
+    doc.setTextColor(0, 102, 153);
+    doc.text(
+      "CERTIFICATE OF COMPLETION",
+      pageWidth / 2,
+      45,
+      { align: "center" }
+    );
 
-    // ================= BODY =================
-    doc.setFontSize(12);
-    doc.setTextColor(0, 0, 0);
-    doc.text("This certificate is proudly presented to", 105, 80, {
-      align: "center",
-    });
+    // Decorative line
+    doc.line(70, 52, pageWidth - 70, 52);
 
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(18);
-    doc.text("AI Learner", 105, 95, { align: "center" });
-
+    // ================= INTRO TEXT =================
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(12);
+    doc.setFontSize(13);
+    doc.setTextColor(60, 60, 60);
 
     doc.text(
-      "For successfully completing a structured AI Career Roadmap",
-      105,
-      115,
-      { align: "center", maxWidth: 150 }
+      "This certificate is proudly presented to",
+      pageWidth / 2,
+      72,
+      { align: "center" }
+    );
+
+    // ================= USER NAME =================
+    doc.setFont("times", "bold");
+    doc.setFontSize(24);
+    doc.setTextColor(20, 20, 20);
+
+    doc.text(
+      userName,
+      pageWidth / 2,
+      88,
+      { align: "center" }
+    );
+
+    doc.line(90, 92, pageWidth - 90, 92);
+
+    // ================= DESCRIPTION =================
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(13);
+
+    doc.text(
+      "For successfully completing the AI-powered Career Development Roadmap",
+      pageWidth / 2,
+      112,
+      { align: "center" }
     );
 
     doc.text(
-      "demonstrating consistency, discipline, and skill growth",
-      105,
-      130,
-      { align: "center", maxWidth: 150 }
+      "including resume analysis, skill improvement, interview preparation,",
+      pageWidth / 2,
+      123,
+      { align: "center" }
     );
 
-    // ================= DATE =================
-    doc.text(`Date: ${new Date().toLocaleDateString()}`, 30, 180);
+    doc.text(
+      "and structured learning path execution.",
+      pageWidth / 2,
+      134,
+      { align: "center" }
+    );
+
+    // ================= CERTIFICATE ID =================
+    const certificateId =
+      "ACC-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+
+    doc.setFontSize(11);
+    doc.setTextColor(80, 80, 80);
+
+    doc.text(
+      `Certificate ID: ${certificateId}`,
+      25,
+      pageHeight - 55
+    );
+
+    doc.text(
+      `Issue Date: ${new Date().toLocaleDateString()}`,
+      25,
+      pageHeight - 45
+    );
 
     // ================= SIGNATURES =================
-    doc.line(30, 220, 85, 220);
-    doc.text("Learner", 45, 230);
+    doc.setDrawColor(0);
 
-    doc.line(125, 220, 180, 220);
-    doc.text("AI Platform", 140, 230);
-
-    // ================= FOOTER =================
-    doc.setFontSize(10);
-    doc.setTextColor(120, 120, 120);
-    doc.text("AI Career Coach Platform", 105, 270, {
+    doc.line(
+      60,
+      pageHeight - 35,
+      110,
+      pageHeight - 35
+    );
+    doc.text("Platform Supervisor", 85, pageHeight - 28, {
       align: "center",
     });
 
-    doc.save("AI_Roadmap_Certificate.pdf");
+    doc.line(
+      pageWidth - 110,
+      pageHeight - 35,
+      pageWidth - 60,
+      pageHeight - 35
+    );
+    doc.text("AI System", pageWidth - 85, pageHeight - 28, {
+      align: "center",
+    });
+
+    // ================= FOOTER =================
+    doc.setFontSize(9);
+    doc.setTextColor(120, 120, 120);
+
+    doc.text(
+      "This certificate is automatically generated by the AI Career Coach Platform.",
+      pageWidth / 2,
+      pageHeight - 12,
+      { align: "center" }
+    );
+
+    doc.save("AI_Career_Certificate.pdf");
   };
 
   return (
@@ -89,7 +167,7 @@ const RoadmapCompletedCard = ({ onRegenerate }) => {
       </h2>
 
       <p className="max-w-2xl mx-auto text-slate-300 text-sm md:text-base">
-        You’ve completed your roadmap. Download your certificate or generate a new one.
+        The AI Career Roadmap has been successfully completed. Download your official certificate or generate a new roadmap.
       </p>
 
       <div className="
@@ -126,7 +204,7 @@ const RoadmapCompletedCard = ({ onRegenerate }) => {
             shadow-lg shadow-cyan-500/20
           "
         >
-          Generate New Roadmap
+          Regenerate Roadmap
         </button>
 
       </div>
