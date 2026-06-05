@@ -418,12 +418,18 @@ All screenshots are stored in the `UI-screenshots/` folder located inside the ma
 ![Login Required](UI-screenshots/login%20required.png)
 
 ### 📄 Resume Upload & Analysis
-
-![Upload Section](UI-screenshots/uploadsection.png)
+### Uploading Resume is Required
 ![Required Resume 1](UI-screenshots/requiredresume1.png)
 ![Required Resume 2](UI-screenshots/requiredresume2.png)
 ![Required Resume 3](UI-screenshots/requiredresume3.png)
+
+### Uploading Section After Login 
+![Upload Section](UI-screenshots/uploadsection.png)
+
+### Rejected Resume Case
 ![Rejected Resume](UI-screenshots/rejectedresume.png)
+
+### Accepted Resume Case
 ![Resume Result 1](UI-screenshots/resume-result1.png)
 ![Resume Result 2](UI-screenshots/resume-result2.png)
 
@@ -435,8 +441,10 @@ All screenshots are stored in the `UI-screenshots/` folder located inside the ma
 
 ### 🗺️ Learning Roadmap
 
-#### Generate Roadmap
+#### Upload Resume First
 ![Roadmap Upload Resume](UI-screenshots/roadmap-upload-resume.png)
+
+#### Generate Roadmap
 ![Generate Roadmap](UI-screenshots/generate_roadmap.png)
 ![Generate Roadmap 1](UI-screenshots/genenarte-roadmap1.png)
 ![Generate Roadmap 2](UI-screenshots/generate-roadmap2.png)
@@ -447,6 +455,8 @@ All screenshots are stored in the `UI-screenshots/` folder located inside the ma
 
 #### Roadmap Progress
 ![Progress Roadmap](UI-screenshots/progress_roadmap.png)
+
+### Roadmap Completed
 ![Completed Roadmap](UI-screenshots/completed_roadmap.png)
 
 ### 🤖 AI Career Coach
