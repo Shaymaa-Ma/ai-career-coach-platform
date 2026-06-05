@@ -124,7 +124,6 @@ The interview module simulates realistic interview environments.
 
 ### Frontend
 - React.js
-- React.js
 - Tailwind CSS
 - Framer Motion
 - Axios
@@ -448,7 +447,6 @@ All screenshots are stored in the `UI-screenshots/` folder located inside the ma
 
 #### Roadmap Progress
 ![Progress Roadmap](UI-screenshots/progress_roadmap.png)
-![Tasks Roadmap](UI-screenshots/tasks-roadmap.png)
 ![Completed Roadmap](UI-screenshots/completed_roadmap.png)
 
 ### 🤖 AI Career Coach
