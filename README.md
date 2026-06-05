@@ -123,7 +123,7 @@ The interview module simulates realistic interview environments.
 ## Technology Stack
 
 ### Frontend
-- Next.js
+- React.js
 - React.js
 - Tailwind CSS
 - Framer Motion
@@ -153,7 +153,7 @@ The interview module simulates realistic interview environments.
 
 ```text
 ┌───────────────────────────┐
-│      Next.js Frontend     │
+│      React.js Frontend     │
 └─────────────┬─────────────┘
               │
               ▼
@@ -371,7 +371,7 @@ AI_Career_Coach_Platform
 ├── client
 │   ├── components
 │   ├── pages
-│   ├── assets (logo + hero-img)
+│   ├── assets (logo+hero-img)
 │   ├── services
 │   └── public
 │
@@ -449,19 +449,18 @@ All screenshots are stored in the `UI-screenshots/` folder located inside the ma
 #### Roadmap Progress
 ![Progress Roadmap](UI-screenshots/progress_roadmap.png)
 ![Tasks Roadmap](UI-screenshots/tasks-roadmap.png)
-![Week 1](UI-screenshots/week1.png)
-![Week 2](UI-screenshots/week2.png)
-![Week 3](UI-screenshots/week3.png)
 ![Completed Roadmap](UI-screenshots/completed_roadmap.png)
 
 ### 🤖 AI Career Coach
-
+### Loged in User Chat Sessions
 ![Coach 1](UI-screenshots/chat-session1.png)
 ![Coach 2](UI-screenshots/chat-session2.png)
+
+### Guest Chat Session
 ![Guest Coach](UI-screenshots/guest_coach.png)
 
 ### 🎤 AI Interview Simulator
-
+### Upload Resume First
 ![Interview Upload Resume](UI-screenshots/interview-upload-resume.png)
 ![Interview 1](UI-screenshots/interview1.png)
 ![Interview 2](UI-screenshots/interview2.png)
@@ -475,8 +474,7 @@ All screenshots are stored in the `UI-screenshots/` folder located inside the ma
 ![Interview 10](UI-screenshots/interview10.png)
 ![Interview 11](UI-screenshots/interview11.png)
 
-#### Interview Progress & Reports
-![Progress Interface](UI-screenshots/progressinterface.png)
+#### Interview Reports (3 Cases)
 ![Interview Report 1](UI-screenshots/interview-report1.png)
 ![Interview Report 2](UI-screenshots/interview-report2.png)
 ![Interview Report 3](UI-screenshots/interview-report3.png)
